@@ -5,6 +5,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const session = require('express-session');
+const methodOverride = require('method-override');
 
 // Database Configuration
 mongoose.connect(process.env.DATABASE_URL, {
@@ -32,6 +33,8 @@ app.use(
 	})
 );
 
+app.use(methodOverride('_method'));
+
 // Routes / Controllers
 const userController = require('./controllers/users');
 app.use('/users', userController);
@@ -39,6 +42,17 @@ app.use('/users', userController);
 const sessionsController = require('./controllers/sessions');
 app.use('/sessions', sessionsController);
 
+app.get('/', (req, res) => {
+	if (req.session.currentUser) {
+		res.render('dashboard.ejs', {
+			currentUser: req.session.currentUser
+		});
+	} else {
+		res.render('index.ejs', {
+			currentUser: req.session.currentUser
+		});
+	}
+});
 
 // Listener
 const PORT = process.env.PORT;
